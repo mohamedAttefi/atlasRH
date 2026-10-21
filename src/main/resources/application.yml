@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: atlasrh
+
+  datasource:
+    url: jdbc:postgresql://localhost:5434/atlasrh_db
+    username: atlasrh_user
+    password: atlasrh_dev
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  liquibase:
+    enabled: true
+
+server:
+  port: 8081
+
+logging:
+  level:
+    ma.atlasrh: DEBUG
+    org.springframework: INFO

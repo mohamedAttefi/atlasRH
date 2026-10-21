@@ -1,0 +1,16 @@
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: atlasrh-postgres
+    environment:
+      POSTGRES_DB: atlasrh_db
+      POSTGRES_USER: atlasrh_user
+      POSTGRES_PASSWORD: atlasrh_dev
+    ports:
+      - "5434:5432"
+    volumes:
+      - atlasrh_data:/var/lib/postgresql/data
+
+volumes:
+  atlasrh_data:
