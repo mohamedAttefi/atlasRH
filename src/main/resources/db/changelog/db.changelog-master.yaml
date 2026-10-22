@@ -243,3 +243,23 @@ databaseChangeLog:
               - column:
                   name: days_per_year
                   valueNumeric: 3
+
+  - changeSet:
+      id: 003-demo-data
+      author: atlasrh
+      changes:
+        - insert:
+            tableName: departments
+            columns:
+              - column: { name: name, value: Ressources humaines }
+              - column: { name: description, value: Département RH de démonstration }
+        - insert:
+            tableName: employees
+            columns:
+              - column: { name: matricule, value: AT-0001 }
+              - column: { name: first_name, value: Nadia }
+              - column: { name: last_name, value: Benali }
+              - column: { name: email, value: nadia.benali@example.test }
+              - column: { name: position, value: Responsable RH }
+              - column: { name: hire_date, valueDate: '2020-01-15' }
+              - column: { name: department_id, valueNumeric: 1 }
