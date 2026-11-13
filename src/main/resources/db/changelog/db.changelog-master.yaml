@@ -263,3 +263,37 @@ databaseChangeLog:
               - column: { name: position, value: Responsable RH }
               - column: { name: hire_date, valueDate: '2020-01-15' }
               - column: { name: department_id, valueNumeric: 1 }
+
+  - changeSet:
+      id: 004-api-demo-data
+      author: atlasrh
+      comment: Add related records for exercising employee, contract, leave, and manager APIs.
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO employees (matricule, first_name, last_name, email, position, hire_date, department_id, manager_id)
+              SELECT 'AT-0002', 'Youssef', 'Alaoui', 'youssef.alaoui@example.test', 'Développeur', DATE '2022-04-11', d.id, m.id
+              FROM departments d, employees m
+              WHERE d.name = 'Ressources humaines' AND m.matricule = 'AT-0001';
+
+              INSERT INTO employees (matricule, first_name, last_name, email, position, hire_date, department_id, manager_id)
+              SELECT 'AT-0003', 'Salma', 'Idrissi', 'salma.idrissi@example.test', 'Analyste RH', DATE '2023-09-04', d.id, m.id
+              FROM departments d, employees m
+              WHERE d.name = 'Ressources humaines' AND m.matricule = 'AT-0001';
+
+              INSERT INTO contracts (employee_id, contract_type, start_date, end_date, gross_salary, active)
+              SELECT id, 'CDI', DATE '2020-01-15', NULL, 24000.00, true FROM employees WHERE matricule = 'AT-0001';
+              INSERT INTO contracts (employee_id, contract_type, start_date, end_date, gross_salary, active)
+              SELECT id, 'CDI', DATE '2022-04-11', NULL, 18000.00, true FROM employees WHERE matricule = 'AT-0002';
+              INSERT INTO contracts (employee_id, contract_type, start_date, end_date, gross_salary, active)
+              SELECT id, 'CDD', DATE '2023-09-04', DATE '2027-09-03', 16000.00, true FROM employees WHERE matricule = 'AT-0003';
+
+              INSERT INTO leave_requests (employee_id, leave_type_id, start_date, end_date, reason, status, requested_days)
+              SELECT e.id, t.id, DATE '2026-08-03', DATE '2026-08-07', 'Congé annuel de démonstration', 'APPROUVEE', 5
+              FROM employees e, leave_types t WHERE e.matricule = 'AT-0002' AND t.name = 'ANNUEL';
+              INSERT INTO leave_requests (employee_id, leave_type_id, start_date, end_date, reason, status, requested_days)
+              SELECT e.id, t.id, DATE '2027-05-10', DATE '2027-05-12', 'Demande en attente de démonstration', 'EN_ATTENTE', 3
+              FROM employees e, leave_types t WHERE e.matricule = 'AT-0002' AND t.name = 'ANNUEL';
+              INSERT INTO leave_requests (employee_id, leave_type_id, start_date, end_date, reason, status, comment, requested_days)
+              SELECT e.id, t.id, DATE '2026-10-05', DATE '2026-10-06', 'Congé exceptionnel de démonstration', 'REFUSEE', 'Période non disponible', 2
+              FROM employees e, leave_types t WHERE e.matricule = 'AT-0003' AND t.name = 'EXCEPTIONNEL';
