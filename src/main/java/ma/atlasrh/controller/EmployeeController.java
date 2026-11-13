@@ -3,7 +3,6 @@ package ma.atlasrh.controller;
 import java.util.*;
 
 import org.springframework.data.domain.*;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,12 +27,27 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public Page<EmployeeResponse> list(@RequestParam(required = false) Long departmentId,
-                                       @RequestParam(required = false) String search, @PageableDefault(
-        size = 20,
-        sort = "lastName"
-    ) Pageable p) {
-        return s.list(departmentId, search, p);
+    public Page<EmployeeResponse> list(
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "lastName,asc") String sort) {
+        return s.list(departmentId, search, PageRequest.of(page, size, parseSort(sort)));
+    }
+
+    private Sort parseSort(String sort) {
+        // Swagger may serialize its array-style sort input as ["lastName"].
+        String normalized = sort.replace("[", "").replace("]", "").replace("\"", "").trim();
+        String[] parts = normalized.split(",", 2);
+        String property = parts[0].trim();
+        Set<String> sortableProperties = Set.of("id", "matricule", "firstName", "lastName", "email", "position", "hireDate");
+        if (!sortableProperties.contains(property)) {
+            property = "lastName";
+        }
+        Sort.Direction direction = parts.length > 1 && "desc".equalsIgnoreCase(parts[1].trim())
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+        return Sort.by(direction, property);
     }
 
     @GetMapping("/{id}/team")
