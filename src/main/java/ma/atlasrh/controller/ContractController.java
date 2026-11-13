@@ -4,9 +4,7 @@ import java.util.*;
 
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
-
 import ma.atlasrh.dto.*;
 import ma.atlasrh.service.ContractService;
 
@@ -20,8 +18,7 @@ public class ContractController {
     }
 
     @PostMapping
-    public ResponseEntity<ContractResponse> create(@Valid
-    @RequestBody ContractRequest r) {
+    public ResponseEntity<ContractResponse> create(@Valid @RequestBody ContractRequest r) {
         return ResponseEntity.status(HttpStatus.CREATED).body(s.create(r));
     }
 
@@ -35,6 +32,11 @@ public class ContractController {
         return s.history(employeeId);
     }
 }
+
+
+
+
+
 
 
 //~ Formatted by Jindent --- http://www.jindent.com

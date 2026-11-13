@@ -13,9 +13,4 @@ public interface DepartmentMapper {
     Department toEntity(DepartmentRequest request);
 
     DepartmentResponse toResponse(Department department);
-
-    void updateEntity(
-            DepartmentRequest request,
-            @MappingTarget Department department
-    );
 }

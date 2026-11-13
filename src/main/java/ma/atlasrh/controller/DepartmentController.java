@@ -6,6 +6,7 @@ import ma.atlasrh.dto.DepartmentRequest;
 import ma.atlasrh.dto.DepartmentResponse;
 import ma.atlasrh.entity.Department;
 import ma.atlasrh.mapper.DepartmentMapper;
+import ma.atlasrh.repository.DepartmentRepository;
 import ma.atlasrh.service.DepartmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,14 @@ public class DepartmentController {
 
     private final DepartmentService departmentService;
     private final DepartmentMapper departmentMapper;
+    private final DepartmentRepository departmentRepository;
 
     public DepartmentController(
             DepartmentService departmentService,
-            DepartmentMapper departmentMapper) {
+            DepartmentMapper departmentMapper, DepartmentRepository departmentRepository) {
         this.departmentService = departmentService;
         this.departmentMapper = departmentMapper;
+        this.departmentRepository = departmentRepository;
     }
 
     @PostMapping

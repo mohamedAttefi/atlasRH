@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -24,6 +25,7 @@ public class EmployeeService {
     public EmployeeResponse create(EmployeeRequest r) {
         if (employees.existsByMatriculeIgnoreCase(r.matricule()) || employees.existsByEmailIgnoreCase(r.email()))
             throw new ConflictException("Matricule ou e-mail déjà utilisé");
+
         Employee e = new Employee();
         apply(e, r);
         return response(employees.save(e));
@@ -33,6 +35,7 @@ public class EmployeeService {
         Employee e = get(id);
         if (employees.findAll().stream().anyMatch(x -> !x.getId().equals(id) && (x.getEmail().equalsIgnoreCase(r.email()) || x.getMatricule().equalsIgnoreCase(r.matricule()))))
             throw new ConflictException("Matricule ou e-mail déjà utilisé");
+
         apply(e, r);
         return response(e);
     }
@@ -45,8 +48,10 @@ public class EmployeeService {
         e.setPosition(r.position());
         e.setHireDate(r.hireDate());
         e.setDepartment(departments.findById(r.departmentId()).orElseThrow(() -> new ResourceNotFoundException("Département introuvable")));
-        if (Objects.equals(e.getId(), r.managerId()))
+
+        if (r.managerId() != null && Objects.equals(e.getId(), r.managerId()))
             throw new IllegalArgumentException("Un employé ne peut pas être son propre manager");
+
         e.setManager(r.managerId() == null ? null : get(r.managerId()));
     }
 
@@ -59,8 +64,25 @@ public class EmployeeService {
     }
 
     @Transactional(readOnly = true)
-    public Page<EmployeeResponse> list(Long departmentId, String search, Pageable p) {
-        Page<Employee> page = departmentId != null ? employees.findByDepartmentId(departmentId, p) : search != null ? employees.findByLastNameContainingIgnoreCaseOrFirstNameContainingIgnoreCase(search, search, p) : employees.findAll(p);
+    public Page<EmployeeResponse> list(
+            Long departmentId,
+            String search,
+            Pageable p) {
+
+        Page<Employee> page;
+
+        if (departmentId != null) {
+            page = employees.findByDepartmentId(departmentId, p);
+
+        } else if (search != null && !search.isBlank()) {
+            page = employees
+                    .findByLastNameContainingIgnoreCaseOrFirstNameContainingIgnoreCase(
+                            search, search, p);
+
+        } else {
+            page = employees.findAll(p);
+        }
+
         return page.map(this::response);
     }
 
@@ -68,5 +90,11 @@ public class EmployeeService {
     public List<EmployeeResponse> team(Long id) {
         get(id);
         return employees.findByManagerId(id).stream().map(this::response).toList();
+    }
+
+    public String listEmail(long departementId, Pageable p) {
+        return employees.findByDepartmentId(departementId, p).stream()
+                .map(employee -> employee.getEmail())
+                .collect(Collectors.joining(";"));
     }
 }

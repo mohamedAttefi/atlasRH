@@ -22,11 +22,17 @@ public class ContractService {
 
     public ContractResponse create(ContractRequest r) {
         if ((r.type() == ContractType.CDD || r.type() == ContractType.STAGE) && r.endDate() == null)
+
             throw new IllegalArgumentException("La date de fin est obligatoire pour un CDD ou un STAGE");
+
         if (r.endDate() != null && r.endDate().isBefore(r.startDate()))
+
             throw new IllegalArgumentException("La date de fin précède la date de début");
+
         if (repo.existsByEmployeeIdAndActiveTrue(r.employeeId()))
+
             throw new ConflictException("L'employé possède déjà un contrat actif");
+
         Contract c = new Contract();
         c.setEmployee(employees.get(r.employeeId()));
         c.setType(r.type());

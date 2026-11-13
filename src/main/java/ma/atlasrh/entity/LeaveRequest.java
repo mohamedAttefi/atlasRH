@@ -10,23 +10,31 @@ public class LeaveRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "employee_id")
     private Employee employee;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "leave_type_id")
     private LeaveType leaveType;
+
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
+
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
+
     @Column(nullable = false)
     private String reason;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LeaveStatus status = LeaveStatus.EN_ATTENTE;
+
     @Column(length = 500)
     private String comment;
+
     @Column(name = "requested_days", nullable = false)
     private int requestedDays;
 

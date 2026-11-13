@@ -8,8 +8,10 @@ public class LeaveType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false, unique = true)
     private String name;
+
     @Column(name = "days_per_year", nullable = false)
     private int daysPerYear;
 
@@ -23,5 +25,13 @@ public class LeaveType {
 
     public int getDaysPerYear() {
         return daysPerYear;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDaysPerYear(int daysPerYear) {
+        this.daysPerYear = daysPerYear;
     }
 }

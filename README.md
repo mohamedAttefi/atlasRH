@@ -11,6 +11,8 @@ docker compose up -d
 
 PostgreSQL écoute sur `localhost:5434` (base `atlasrh_db`, identifiants de développement définis dans `compose.yml`). Liquibase crée les tables et initialise les types de congé. L’API écoute sur `http://localhost:8081`. Swagger UI : `/swagger-ui.html`; spécification : `/v3/api-docs`.
 
+Au prochain démarrage, Liquibase ajoute des données de démonstration pour tester les API : employés `AT-0001` (manager), `AT-0002` et `AT-0003`, leurs contrats, ainsi que des demandes de congé approuvée, en attente et refusée. Les types de congé sont `ANNUEL` (ID 1) et `EXCEPTIONNEL` (ID 2) sur une base neuve. Nadia (`AT-0001`) gère Youssef (`AT-0002`) et Salma (`AT-0003`).
+
 ## Architecture
 
 - `controller`: HTTP et validation de forme; jamais de logique métier.
@@ -62,3 +64,30 @@ erDiagram
 - **Epic RH**: US départements, employés, contrats. Critères: unicité nom/matricule/e-mail, département non supprimable s’il est occupé, manager différent du salarié, un contrat actif maximum.
 - **Epic Congés**: US demande, décision, consultation du solde. Critères: jours ouvrés, pas de chevauchement, demande au statut attendu, solde suffisant, refus commenté, annulation propriétaire seulement.
 - **Tâches transverses**: modèle Liquibase et données de référence, DTO/MapStruct, gestion des erreurs, OpenAPI, README/diagramme, démonstration.
+
+## Stratégie de tests et qualité (Sprint 3)
+
+- Tests unitaires JUnit 5 / Mockito des services : unicité matricule/e-mail, manager de soi-même, contrat actif unique, jours ouvrés, solde, décision et annulation.
+- Tests MVC avec `@WebMvcTest` et `MockMvc` : création, validation, réponses JSON, pagination et conflits HTTP.
+- Tests repository avec `@DataJpaTest` : recherche, filtre département, pagination et tri.
+- Tests de bout en bout avec `@SpringBootTest` et MockMvc : approbation d’une demande et refus de suppression d’un département occupé.
+- Les tests Spring utilisent le profil `test`, H2 en mémoire et Liquibase. Ils ne se connectent pas à PostgreSQL de développement.
+
+### Exécuter les tests et produire le rapport
+
+```bash
+mvn test
+mvn verify
+```
+
+Le rapport HTML JaCoCo est généré dans `target/site/jacoco/index.html`. Le contrôle Maven impose une couverture des lignes du bundle de 80 % au moment de `verify`; le build échoue tant que ce seuil n’est pas atteint. Le rapport de sprint est dans [`docs/quality-report.md`](docs/quality-report.md), et les user stories et critères d’acceptation prêts à saisir dans Jira dans [`docs/jira-plan.md`](docs/jira-plan.md).
+
+### Analyse SonarQube locale
+
+Après démarrage d’une instance SonarQube et création d’un token local :
+
+```bash
+mvn verify sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.token="$SONAR_TOKEN" -Dsonar.projectKey=atlasrh
+```
+
+Le projet doit être analysé dans SonarQube pour renseigner les observations et le statut Quality Gate dans le rapport. Aucun résultat Sonar n’est déclaré avant cette exécution.
